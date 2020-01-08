@@ -524,8 +524,11 @@ class _TransformerPageViewState extends State<TransformerPageView> {
       _fromIndex = _activeIndex = _pageController.initialPage;
       if (!created) {
         int initPage = _pageController.getRealIndexFromRenderIndex(index);
-        _pageController.animateToPage(initPage,
-            duration: widget.duration, curve: widget.curve);
+
+        if (_pageController.hasClients) {
+          _pageController.animateToPage(initPage,
+              duration: widget.duration, curve: widget.curve);
+        }
       }
     }
     if (_transformer != null)
@@ -601,14 +604,16 @@ class _TransformerPageViewState extends State<TransformerPageView> {
         //ignore this event
         return;
     }
-    if (widget.controller.animation) {
-      _pageController
-          .animateToPage(index,
-              duration: widget.duration, curve: widget.curve ?? Curves.ease)
-          .whenComplete(widget.controller.complete);
-    } else {
-      _pageController.jumpToPage(index);
-      widget.controller.complete();
+    if (_pageController.hasClients) {
+      if (widget.controller.animation) {
+        _pageController
+            .animateToPage(index,
+            duration: widget.duration, curve: widget.curve ?? Curves.ease)
+            .whenComplete(widget.controller.complete);
+      } else {
+        _pageController.jumpToPage(index);
+        widget.controller.complete();
+      }
     }
   }
 
